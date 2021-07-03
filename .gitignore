@@ -1,1 +1,3 @@
 .vscode
+controller1.0/
+!*/controller.vhd
