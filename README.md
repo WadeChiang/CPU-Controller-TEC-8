@@ -1,8 +1,16 @@
 # BUPT Computer Organization Course Design -- 一款基于Altera EPM7128的硬连线控制器
 
-小组成员：@胡鹏 @陈祥 @蒋泽宇 @李治淳
+小组成员：
 
+@weikeduo1
+
+@Jaskon863
+
+@monstry
+
+@WadeChiang (me)
 ## Feature
 
-- [ ] 基础功能
-- [ ] 流水
+- [x] 基础功能
+- [x] 流水
+- [ ] 中断

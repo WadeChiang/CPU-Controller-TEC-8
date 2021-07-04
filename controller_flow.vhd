@@ -2,7 +2,7 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 ---------THIS FILE CODED IN UTF-8--------
-entity computer_course1 is
+entity CPU_controller is
     port (
         -------- INPUT SIGNAL--------
         --复位信号，低电平有效
@@ -45,9 +45,9 @@ entity computer_course1 is
         --控制指令周期中机器周期数量，SHORT=TRUE时W2被跳过，LONG=TURE时才会进入W3
         SHORT, LONG : out STD_LOGIC
     );
-end computer_course1;
+end CPU_controller;
 
-architecture struct of computer_course1 is
+architecture struct of CPU_controller is
     signal SW : STD_LOGIC_VECTOR(2 downto 0);
     signal IR : STD_LOGIC_VECTOR(3 downto 0);
     signal ST0, SST0 : STD_LOGIC;
