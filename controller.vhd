@@ -2,7 +2,7 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 ---------THIS FILE CODED IN UTF-8--------
-entity CPU_controller is
+entity computer_course1 is
     port (
         -------- INPUT SIGNAL--------
         --复位信号，低电平有效
@@ -45,9 +45,9 @@ entity CPU_controller is
         --控制指令周期中机器周期数量，SHORT=TRUE时W2被跳过，LONG=TURE时才会进入W3
         SHORT, LONG : out STD_LOGIC
     );
-end CPU_controller;
+end computer_course1;
 
-architecture struct of CPU_controller is
+architecture struct of computer_course1 is
     signal SW : STD_LOGIC_VECTOR(2 downto 0);
     signal IR : STD_LOGIC_VECTOR(3 downto 0);
     signal ST0, SST0 : STD_LOGIC;
@@ -138,7 +138,7 @@ begin
                 if ST0 = '0' then
                     LPC <= W1;
                     SBUS <= W1;
-                    STP <= W1;
+                    STP <= W1 or W2;
                     LIR <= W2;
                     PCINC <= W2;
                     if ST0 <= '0' and W2 = '1'then
@@ -152,6 +152,7 @@ begin
                             SHORT <= W1;
                         when "0001" => --ADD
                             S <= "1001";
+                            M <= not W1;
                             CIN <= W1;
                             ABUS <= W1;
                             DRW <= W1;
@@ -162,6 +163,8 @@ begin
                             SHORT <= W1;
                         when "0010" => --SUB
                             S <= "0110";
+                            M <= not W1;
+                            CIN <= not W1;
                             ABUS <= W1;
                             DRW <= W1;
                             LDZ <= W1;
@@ -180,7 +183,9 @@ begin
                             SHORT <= W1;
                         when "0100" => --INC
                             S <= "0000";
+                            M <= not W1;
                             ABUS <= W1;
+                            CIN <= not W1;
                             DRW <= W1;
                             LDZ <= W1;
                             LDC <= W1;
@@ -197,7 +202,7 @@ begin
                             LIR <= W2;
                             PCINC <= W2;
                         when "0110" => --ST
-                            M <= W1;
+                            M <= W1 or W2;
                             if W1 = '1' then
                                 S <= "1111";
                             elsif W2 = '1' then
@@ -245,6 +250,8 @@ begin
                             SHORT <= W1;
                         when "1011" => --CMP
                             S <= "0110";
+                            M <= not W1;
+                            CIN <= not W1;
                             ABUS <= W1;
                             LDC <= W1;
                             LDZ <= W1;
