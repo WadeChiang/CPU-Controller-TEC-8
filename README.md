@@ -2,13 +2,14 @@
 
 小组成员：
 
-@weikeduo1
+[@weikeduo1](https://github.com/weikeduo1)
 
-@Jaskon863
+[@Jaskon863](https://github.com/Jaskon863)
 
-@monstry
+[@Monstry](https://github.com/Monstry)
 
 @WadeChiang (me)
+
 ## Feature
 
 - [x] 基础功能
