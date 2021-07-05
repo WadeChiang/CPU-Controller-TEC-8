@@ -2,7 +2,7 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 ---------THIS FILE CODED IN UTF-8--------
-entity CPU_controller is
+entity computer_course1 is
     port (
         -------- INPUT SIGNAL--------
         --复位信号，低电平有效
@@ -45,9 +45,9 @@ entity CPU_controller is
         --控制指令周期中机器周期数量，SHORT=TRUE时W2被跳过，LONG=TURE时才会进入W3
         SHORT, LONG : out STD_LOGIC
     );
-end CPU_controller;
+end computer_course1;
 
-architecture struct of CPU_controller is
+architecture struct of computer_course1 is
     signal SW : STD_LOGIC_VECTOR(2 downto 0);
     signal IR : STD_LOGIC_VECTOR(3 downto 0);
     signal ST0, SST0 : STD_LOGIC;
@@ -74,6 +74,7 @@ begin
         STP <= '0';
         SELCTL <= '0';
         CIN <= '0';
+        M <= '0';
         MEMW <= '0';
         ABUS <= '0';
         SBUS <= '0';
@@ -158,20 +159,20 @@ begin
                             DRW <= W1;
                             LDZ <= W1;
                             LDC <= W1;
-                            LIR <= W1;
-                            PCINC <= W1;
-                            SHORT <= W1;
+                            LIR <= W2;
+                            PCINC <= W2;
+                            --SHORT <= W1;
                         when "0010" => --SUB
                             S <= "0110";
-                            M <= not W1;
-                            CIN <= not W1;
+                            M <= '0';
+                            CIN <= '0';
                             ABUS <= W1;
                             DRW <= W1;
                             LDZ <= W1;
                             LDC <= W1;
-                            LIR <= W1;
-                            PCINC <= W1;
-                            SHORT <= W1;
+                            LIR <= W2;
+                            PCINC <= W2;
+                            --SHORT <= W1;
                         when "0011" => --AND
                             M <= W1;
                             S <= "1011";
@@ -199,8 +200,9 @@ begin
                             LAR <= W1;
                             MBUS <= W2;
                             DRW <= W2;
-                            LIR <= W2;
-                            PCINC <= W2;
+                            LONG <= '1';
+                            LIR <= W3;
+                            PCINC <= W3;
                         when "0110" => --ST
                             M <= W1 or W2;
                             if W1 = '1' then
@@ -220,8 +222,9 @@ begin
                                 SHORT <= W1;
                             else
                                 PCADD <= W1;
-                                LIR <= W2;
-                                PCINC <= W2;
+                                LIR <= W3;
+                                LONG <= '1';
+                                PCINC <= W3;
                             end if;
                         when "1000" => --JZ
                             if Z = '0' then
@@ -230,8 +233,9 @@ begin
                                 SHORT <= W1;
                             else
                                 PCADD <= W1;
-                                LIR <= W2;
-                                PCINC <= W2;
+                                LIR <= W3;
+                                LONG <= '1';
+                                PCINC <= W3;
                             end if;
                         when "1001" => --JMP
                             M <= W1;
@@ -242,7 +246,7 @@ begin
                             PCINC <= W2;
                         when "1010" => --MOV
                             M <= W1;
-                            S <= "1111";
+                            S <= "1010";
                             ABUS <= W1;
                             DRW <= W1;
                             LIR <= W1;
@@ -265,10 +269,11 @@ begin
                             DRW <= W1;
                             LDC <= W1;
                             LIR <= W1;
+                            PCINC <= W1;
                             SHORT <= W1;
                         when "1101" => --*****OUT******
                             M <= W1;
-                            S <= "1111";
+                            S <= "1010";
                             ABUS <= W1;
                             LIR <= W1;
                             PCINC <= W1;
