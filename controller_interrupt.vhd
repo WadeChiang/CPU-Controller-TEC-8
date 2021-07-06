@@ -1,8 +1,8 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
----------THIS FILE CODED IN UTF-8--------
-entity CPU_controller is
+---------THIS FILE CODED IN GB 2312--------
+entity CPU_INT is
     port (
         -------- INPUT SIGNAL--------
         --复位信号，低电平有效
@@ -46,9 +46,9 @@ entity CPU_controller is
         --控制指令周期中机器周期数量，SHORT=TRUE时W2被跳过，LONG=TURE时才会进入W3
         SHORT, LONG : out STD_LOGIC
     );
-end CPU_controller;
+end CPU_INT;
 
-architecture struct of CPU_controller is
+architecture struct of CPU_INT is
     signal SW : STD_LOGIC_VECTOR(2 downto 0);
     signal IR : STD_LOGIC_VECTOR(3 downto 0);
     signal ST0, SST0 : STD_LOGIC;
@@ -58,7 +58,7 @@ begin
     SW <= SWC & SWB & SWA;
     IR <= IR7 & IR6 & IR5 & IR4;
     --main process
-    process (W3, W2, W1, T3, SW, IR, CLR, PULSE)
+    process (W3, W2, W1, T3, SW, IR, CLR)
     begin
         --initialization
         S <= "0000";
@@ -97,6 +97,10 @@ begin
         elsif falling_edge(T3) then
             ST0 <= SST0;
             INT_FLAG <= INT_FFLAG;
+        end if;
+        if PULSE = '1' and EN_INT = '1' then
+            IS_INT <= '1';
+            EN_INT <= '0';
         end if;
         --SWCBA
         case SW is
@@ -143,11 +147,6 @@ begin
                 STP <= '1';
             when "000" => --取指
                 --is interrupt
-                if PULSE = '1' and EN_INT = '1' then
-                    IS_INT <= '1';
-                    EN_INT <= '0';
-                end if;
-
                 if IS_INT = '1' then
                     --save break point
                     case INT_FLAG is
@@ -185,7 +184,6 @@ begin
                             PCINC <= W2;
                             if W2 = '1' then
                                 INT_FFLAG <= 0;
-                                SST0 <= '1';
                             end if;
                         when others =>
                             null;
@@ -194,7 +192,7 @@ begin
                 else
                     if ST0 = '0' then
                         LPC <= W1;
-                        SBUS <= '1';
+                        SBUS <= W1 or W2;
                         STP <= W1 or W2;
                         DRW <= W2;
                         SELCTL <= W2;
@@ -213,114 +211,136 @@ begin
                         SEL_L <= W1 & W1;
                         LIR <= W1;
                         PCINC <= W1;
-                        SHORT <= W1;
                         --IR Operation
                         case IR is
                             when "0000" => --NOP
-                                SHORT <= W1;
+                                null;
                             when "0001" => --ADD
-                                S <= "1001";
-                                M <= not W1;
-                                CIN <= W1;
-                                ABUS <= W1;
-                                DRW <= W1;
-                                LDZ <= W1;
-                                LDC <= W1;
-                                SHORT <= W1;
-                            when "0010" => --SUB
-                                S <= "0110";
-                                M <= '0';
-                                CIN <= '0';
-                                ABUS <= W1;
-                                DRW <= W1;
-                                LDZ <= W1;
-                                LDC <= W1;
-                                SHORT <= W1;
-                            when "0011" => --AND
-                                M <= W1;
-                                S <= "1011";
-                                ABUS <= W1;
-                                DRW <= W1;
-                                LDZ <= W1;
-                                SHORT <= W1;
-                            when "0100" => --INC
-                                S <= "0000";
-                                M <= not W1;
-                                ABUS <= W1;
-                                CIN <= not W1;
-                                DRW <= W1;
-                                LDZ <= W1;
-                                LDC <= W1;
-                                SHORT <= W1;
-                            when "0101" => --LD
-                                S <= "1010";
-                                M <= W1;
-                                ABUS <= W1;
-                                LAR <= W1;
-                                MBUS <= W2;
+                                S <= W2 & not W2 & not W2 & W2;
+                                M <= not W2;
+                                CIN <= W2;
+                                ABUS <= W2;
                                 DRW <= W2;
+                                LDZ <= W2;
+                                LDC <= W2;
+                                --SHORT <= W1;
+                            when "0010" => --SUB
+                                S <= not W2 & W2 & W2 & not W2;
+                                M <= W2;
+                                CIN <= W2;
+                                ABUS <= W2;
+                                DRW <= W2;
+                                LDZ <= W2;
+                                LDC <= W2;
+                                --SHORT <= W1;
+                            when "0011" => --AND
+                                M <= W2;
+                                S <= W2 & not W2 & W2 & W2;
+                                ABUS <= W2;
+                                DRW <= W2;
+                                LDZ <= W2;
+                                --SHORT <= W1;
+                            when "0100" => --INC
+                                S <= not W2 & not W2 & not W2 & not W2;
+                                M <= not W2;
+                                ABUS <= W2;
+                                CIN <= not W2;
+                                DRW <= W2;
+                                LDZ <= W2;
+                                LDC <= W2;
+                                --SHORT <= W1;
+                            when "0101" => --LD
+                                LONG <= W2;
+                                S <= W2 & not W2 & W2 & not W2;
+                                M <= W2;
+                                ABUS <= W2;
+                                LAR <= W2;
+                                MBUS <= W3;
+                                DRW <= W3;
                             when "0110" => --ST
-                                M <= W1 or W2;
-                                if W1 = '1' then
+                                LONG <= W2;
+                                M <= W2 or W3;
+                                if W2 = '1' then
                                     S <= "1111";
-                                elsif W2 = '1' then
+                                elsif W3 = '1' then
                                     S <= "1010";
                                 end if;
-                                ABUS <= W1 or W2;
-                                LAR <= W1;
-                                MEMW <= W2;
+                                ABUS <= W2 or W3;
+                                LAR <= W2;
+                                MEMW <= W3;
                             when "0111" => --JC
                                 if C = '0' then
-                                    SHORT <= W1;
+                                    null;
                                 else
-                                    PCADD <= W1;
+                                    LONG <= W2;
+                                    M <= W2 or W3;
+                                    if W2 = '1' or W3 = '1' then
+                                        S <= "1111";
+                                    end if;
+                                    ABUS <= W2;
+                                    LPC <= W2;
+                                    SELCTL <= W3;
+                                    SEL_L <= W3 & W3;
+                                    DRW <= W3;
                                 end if;
                             when "1000" => --JZ
                                 if Z = '0' then
-                                    LIR <= W1;
-                                    PCINC <= W1;
-                                    SHORT <= W1;
+                                    null;
                                 else
-                                    PCADD <= W1;
+                                    LONG <= W2;
+                                    M <= W2 or W3;
+                                    if W2 = '1' or W3 = '1' then
+                                        S <= "1111";
+                                    end if;
+                                    ABUS <= W2;
+                                    LPC <= W2;
+                                    SELCTL <= W3;
+                                    SEL_L <= W3 & W3;
+                                    DRW <= W3;
                                 end if;
                             when "1001" => --JMP
-                                M <= W1 and W2;
-                                S <= "1111";
-                                ABUS <= W1;
-                                LPC <= W1;
-                                SELCTL <= W2;
-                                SEL_L <= W2 & W2;
-                                DRW <= W2;
+                                LONG <= W2;
+                                M <= W2 or W3;
+                                if W2 = '1' or W3 = '1' then
+                                    S <= "1111";
+                                end if;
+                                ABUS <= W2;
+                                LPC <= W2;
+                                SELCTL <= W3;
+                                SEL_L <= W3 & W3;
+                                DRW <= W3;
                             when "1010" => --EI
                                 EN_INT <= '1';
+                                LONG <= EN_INT;
                             when "1011" => --DI
                                 EN_INT <= '0';
                             when "1100" => --OR
-                                M <= W1;
-                                S <= "1110";
-                                ABUS <= W1;
-                                DRW <= W1;
-                                LDC <= W1;
-                                SHORT <= W1;
+                                M <= W2;
+                                S <= W2 & W2 & W2 & not W2;
+                                ABUS <= W2;
+                                DRW <= W2;
+                                LDC <= W2;
+                                --SHORT <= W1;
                             when "1101" => --*****OUT******
-                                M <= W1;
-                                S <= "1010";
-                                ABUS <= W1;
-                                SHORT <= W1;
+                                M <= W2;
+                                S <= W2 & not W2 & W2 & not W2;
+                                ABUS <= W2;
+                                SHORT <= W2;
                             when "1110" => --STP
-                                STP <= W1;
+                                STP <= W2;
                             when "1111" => --IRET
                                 --return to break point
                                 case INT_FLAG is
                                     when 0 =>
-                                        M <= W1;
-                                        S <= W1 & W1 & W1 & W1;
-                                        ABUS <= W1;
-                                        LAR <= '1';
-                                        SELCTL <= W1;
-                                        SEL_L <= W1 & W1;
-                                        MBUS <= W2;
-                                        if W2 = '1' then
+                                        LONG <= W2;
+                                        M <= W2;
+                                        S <= W2 & W2 & W2 & W2;
+                                        ABUS <= W2;
+                                        LAR <= W2 or W3;
+                                        SELCTL <= W2;
+                                        SEL_L <= W2 & W2;
+                                        MBUS <= W3;
+                                        if W3 = '1' then
                                             INT_FFLAG <= 1;
                                         end if;
                                     when 1 =>
