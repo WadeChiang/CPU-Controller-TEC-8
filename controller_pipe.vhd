@@ -1,8 +1,8 @@
+---------THIS FILE CODED IN UTF-8--------
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
----------THIS FILE CODED IN UTF-8--------
-entity computer_course1 is
+entity controller_pipe is
     port (
         -------- INPUT SIGNAL--------
         --复位信号，低电平有效
@@ -45,9 +45,9 @@ entity computer_course1 is
         --控制指令周期中机器周期数量，SHORT=TRUE时W2被跳过，LONG=TURE时才会进入W3
         SHORT, LONG : out STD_LOGIC
     );
-end computer_course1;
+end controller_pipe;
 
-architecture struct of computer_course1 is
+architecture struct of controller_pipe is
     signal SW : STD_LOGIC_VECTOR(2 downto 0);
     signal IR : STD_LOGIC_VECTOR(3 downto 0);
     signal ST0, SST0 : STD_LOGIC;
@@ -86,7 +86,7 @@ begin
         if CLR = '0' then
             ST0 <= '0';
             SST0 <= '0';
-            --ST0 from 0 to 1
+            --Assign SST0 2 ST0 at T3 falling edge
         elsif falling_edge(T3) then
             if SST0 = '1' then
                 ST0 <= '1';
@@ -291,8 +291,11 @@ begin
                             SHORT <= W1;
                         when others => null;
                     end case;
+                    --END CASE IR
                 end if;
+                --END IF ST0
             when others => null;
         end case;
+        --END CASE SW
     end process;
 end struct;
