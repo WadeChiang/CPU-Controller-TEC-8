@@ -2,7 +2,7 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
-entity controller_pipe is
+entity controller_pipe is --定义实体, 端口
     port (
         -------- INPUT SIGNAL--------
         --复位信号，低电平有效
@@ -48,10 +48,12 @@ entity controller_pipe is
 end controller_pipe;
 
 architecture struct of controller_pipe is
+    --定义信号
     signal SW : STD_LOGIC_VECTOR(2 downto 0);
     signal IR : STD_LOGIC_VECTOR(3 downto 0);
     signal ST0, SST0 : STD_LOGIC;
 begin
+    --定义, 组合信号
     SW <= SWC & SWB & SWA;
     IR <= IR7 & IR6 & IR5 & IR4;
     --main process
