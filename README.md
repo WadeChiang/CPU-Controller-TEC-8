@@ -1,4 +1,4 @@
-# BUPT Computer Organization Course Design -- 一款基于Altera EPM7128的硬连线控制器
+# BUPT Computer Architecture Course Design -- 一款基于 Altera EPM7128 的硬连线控制器
 
 小组成员：
 
